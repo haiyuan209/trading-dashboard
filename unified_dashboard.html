@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Options Trading Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #151b2d;
+            --border: #2d3748;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --accent-yellow: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 100vw;
+            margin: 0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .view-selector {
+            padding: 10px 20px;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .view-selector:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .ticker-selector {
+            position: relative;
+            width: 350px;
+        }
+
+        #ticker-search {
+            width: 100%;
+            padding: 12px 40px 12px 15px;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        #ticker-search:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        /* Heatmap View Styles */
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        select,
+        button {
+            padding: 8px 15px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        select:hover,
+        button:hover {
+            background: #1a1a2a;
+            border-color: var(--accent-blue);
+        }
+
+        .heatmap-container {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            height: calc(100vh - 180px);
+            align-items: flex-start;
+            overflow: auto;
+        }
+
+        .heatmap-grid {
+            flex: 1;
+            background: #0a0a0a;
+            padding: 10px;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .grid-header {
+            display: flex;
+            margin-bottom: 5px;
+        }
+
+        .strike-label {
+            width: 70px;
+            text-align: right;
+            padding-right: 10px;
+            font-size: 13px;
+            font-weight: bold;
+            flex-shrink: 0;
+            color: var(--text-main);
+        }
+
+        .exp-header {
+            flex: 1;
+            min-width: 80px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+            padding: 8px;
+            border-bottom: 2px solid #444;
+        }
+
+        .grid-row {
+            display: flex;
+            margin-bottom: 2px;
+        }
+
+        .cell {
+            flex: 1;
+            min-width: 80px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid #222;
+        }
+
+        .cell:hover {
+            border-color: #fff;
+            z-index: 10;
+        }
+
+        .legend {
+            width: 140px;
+            min-width: 140px;
+            background: var(--bg-card);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        /* Analytics View Styles */
+        .ticker-info-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--accent-blue);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            margin-top: 15px;
+        }
+
+        .calc-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .metric {
+            padding: 12px;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .metric-value.positive {
+            color: var(--accent-green);
+        }
+
+        .metric-value.negative {
+            color: var(--accent-red);
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        .hedge-actions {
+            margin-top: 20px;
+        }
+
+        .action-item {
+            padding: 10px;
+            background: var(--bg-dark);
+            border-left: 4px solid var(--accent-yellow);
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .action-trigger {
+            font-weight: 600;
+            color: var(--accent-yellow);
+        }
+
+        .action-detail {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 3px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <h1>📊 Options Trading Dashboard</h1>
+                <select class="view-selector" id="view-selector">
+                    <option value="heatmap">Heatmap View</option>
+                    <option value="analytics">Analytics View</option>
+                </select>
+            </div>
+            <div class="ticker-selector">
+                <input type="text" id="ticker-search" placeholder="Select ticker..." autocomplete="off">
+                <span class="search-icon">🔍</span>
+            </div>
+        </div>
+
+        <!-- Heatmap View -->
+        <div id="heatmap-view">
+            <div class="controls"
+                style="display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <label>
+                        Greek:
+                        <select id="greek-select">
+                            <option value="GEX">Gamma Exposure (GEX)</option>
+                            <option value="VEX">Vega Exposure (VEX)</option>
+                        </select>
+                    </label>
+                    <button onclick="refreshHeatmapData()">Refresh</button>
+                </div>
+                <div id="footer"
+                    style="flex: 1; text-align: center; color: var(--accent-blue); font-size: 0.9rem; font-weight: 500;">
+                </div>
+            </div>
+
+            <div class="heatmap-container">
+                <div class="heatmap-grid">
+                    <div id="heatmap"></div>
+                </div>
+                <div class="legend">
+                    <div style="font-weight: bold; margin-bottom: 10px; color: var(--accent-blue);">Scale</div>
+                    <div id="legend-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics View -->
+    <div id="analytics-view" class="hidden">
+        <div style="max-width: 1800px; margin: 0 auto;">
+            <div id="ticker-info" class="ticker-info-panel" style="display: none;"></div>
+
+            <div id="loading" class="loading">
+                <div>Loading analytics data...</div>
+            </div>
+
+            <div id="dashboard-content" style="display: none;">
+                <!-- Hedging Calculator -->
+                <div class="card">
+                    <div class="card-title">⚡ Market Maker Hedging Scenarios</div>
+                    <div style="margin-bottom: 15px; color: var(--text-muted); font-size: 0.9rem;">
+                        As price moves, market makers must dynamically hedge their positions:
+                    </div>
+                    <div class="calc-results" id="calc-results"></div>
+                    <div class="hedge-actions" id="hedge-actions"></div>
+                </div>
+
+                <div class="grid">
+                    <div class="card">
+                        <div class="card-title">💰 Gamma Exposure (GEX)</div>
+                        <div class="chart-container">
+                            <canvas id="gexChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">⚖️ Delta Exposure</div>
+                        <div class="chart-container">
+                            <canvas id="deltaChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Sources -->
+    <script src="option_data.js"></script>
+    <script src="all_tickers_data.js"></script>
+    <script src="ticker_metadata.js"></script>
+
+    <script>
+        // Global state
+        let currentView = 'heatmap';
+        let currentTicker = null;
+        let charts = {};
+        let heatmapData = [];
+        let analyticsData = {};
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initializeData();
+            initializeViewSwitcher();
+            initializeTickerSearch();
+        });
+
+        function initializeData() {
+            // Load heatmap data
+            if (typeof OPTION_DATA !== 'undefined') {
+                heatmapData = OPTION_DATA;
+                console.log('[OK] Loaded heatmap data:', heatmapData.length, 'contracts');
+            }
+
+            // Load analytics data
+            if (typeof TICKER_DATA !== 'undefined') {
+                const rawData = TICKER_DATA.data || {};
+                for (let ticker in rawData) {
+                    analyticsData[ticker] = {
+                        price: rawData[ticker].price,
+                        timestamp: rawData[ticker].timestamp,
+                        strikes: {}
+                    };
+                    for (let strikeKey in rawData[ticker].strikes) {
+                        const numericKey = parseFloat(strikeKey);
+                        analyticsData[ticker].strikes[numericKey] = rawData[ticker].strikes[strikeKey];
+                    }
+                }
+                console.log('[OK] Loaded analytics data:', Object.keys(analyticsData).length, 'tickers');
+            }
+        }
+
+        function initializeViewSwitcher() {
+            const selector = document.getElementById('view-selector');
+            selector.addEventListener('change', (e) => {
+                currentView = e.target.value;
+                switchView();
+            });
+        }
+
+        function switchView() {
+            const heatmapView = document.getElementById('heatmap-view');
+            const analyticsView = document.getElementById('analytics-view');
+
+            if (currentView === 'heatmap') {
+                heatmapView.classList.remove('hidden');
+                analyticsView.classList.add('hidden');
+                if (currentTicker) loadHeatmapData(currentTicker);
+            } else {
+                heatmapView.classList.add('hidden');
+                analyticsView.classList.remove('hidden');
+                if (currentTicker) loadAnalyticsData(currentTicker);
+            }
+        }
+
+        function initializeTickerSearch() {
+            const searchInput = document.getElementById('ticker-search');
+
+            // Get unique tickers from both data sources
+            const heatmapTickers = [...new Set(heatmapData.map(d => d.Symbol))];
+            const analyticsTickers = Object.keys(analyticsData);
+            const allTickers = [...new Set([...heatmapTickers, ...analyticsTickers])].sort();
+
+            console.log('[Search] Available tickers:', allTickers.length, allTickers.slice(0, 10));
+
+            // Create autocomplete datalist
+            const datalist = document.createElement('datalist');
+            datalist.id = 'ticker-suggestions';
+            allTickers.forEach(ticker => {
+                const option = document.createElement('option');
+                option.value = ticker;
+                datalist.appendChild(option);
+            });
+            document.body.appendChild(datalist);
+            searchInput.setAttribute('list', 'ticker-suggestions');
+
+            // Search on Enter key
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const value = e.target.value.toUpperCase().trim();
+                    console.log('[Search] Enter pressed, searching for:', value);
+                    if (allTickers.includes(value)) {
+                        console.log('[Search] Ticker found! Selecting:', value);
+                        selectTicker(value);
+                    } else {
+                        console.log('[Search] Ticker not found:', value);
+                        // Show error feedback
+                        searchInput.style.borderColor = 'var(--accent-red)';
+                        setTimeout(() => {
+                            searchInput.style.borderColor = '';
+                        }, 1000);
+                    }
+                }
+            });
+
+            // Auto-select on exact match while typing
+            searchInput.addEventListener('input', (e) => {
+                const value = e.target.value.toUpperCase();
+                if (value.length > 0 && allTickers.includes(value)) {
+                    selectTicker(value);
+                }
+            });
+
+            // Set first ticker as default
+            if (allTickers.length > 0) {
+                console.log('[Search] Setting default ticker:', allTickers[0]);
+                selectTicker(allTickers[0]);
+            }
+        }
+
+        function selectTicker(ticker) {
+            console.log('[Select] Switching to ticker:', ticker, 'View:', currentView);
+            currentTicker = ticker;
+            const searchInput = document.getElementById('ticker-search');
+            searchInput.value = ticker;
+
+            // Visual feedback that ticker was selected
+            searchInput.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+            setTimeout(() => {
+                searchInput.style.backgroundColor = '';
+            }, 500);
+
+            if (currentView === 'heatmap') {
+                loadHeatmapData(ticker);
+            } else {
+                loadAnalyticsData(ticker);
+            }
+        }
+
+        // ===== HEATMAP VIEW FUNCTIONS =====
+
+        let currentGreek = 'GEX';
+
+        document.getElementById('greek-select')?.addEventListener('change', (e) => {
+            currentGreek = e.target.value;
+            if (currentTicker) loadHeatmapData(currentTicker);
+        });
+
+        function loadHeatmapData(ticker) {
+            const tickerData = heatmapData.filter(r => r.Symbol === ticker);
+            if (tickerData.length === 0) {
+                document.getElementById('heatmap').innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">No heatmap data for ' + ticker + '</div>';
+                return;
+            }
+
+            generateHeatmap(tickerData);
+        }
+
+        function generateHeatmap(tickerData) {
+            const spotPrice = tickerData[0].UnderlyingPrice || tickerData[0].Last || 100;
+            const expirations = [...new Set(tickerData.map(r => r.Expiration))].sort().slice(0, 10);
+
+            // Get all unique strikes and limit to 50 centered around spot price
+            const allStrikes = [...new Set(tickerData.map(r => r.Strike))].sort((a, b) => b - a);
+
+            // Find the strike closest to spot price
+            let closestIndex = 0;
+            let minDiff = Math.abs(allStrikes[0] - spotPrice);
+            for (let i = 1; i < allStrikes.length; i++) {
+                const diff = Math.abs(allStrikes[i] - spotPrice);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestIndex = i;
+                }
+            }
+
+            // Get 25 strikes above and 25 strikes below the spot price
+            const startIndex = Math.max(0, closestIndex - 25);
+            const endIndex = Math.min(allStrikes.length, startIndex + 50);
+            const strikes = allStrikes.slice(startIndex, endIndex);
+
+            // Build data matrix
+            const matrix = {};
+            const gammaMatrix = {};
+            strikes.forEach(strike => {
+                matrix[strike] = {};
+                gammaMatrix[strike] = {};
+                expirations.forEach(exp => {
+                    const contracts = tickerData.filter(r => r.Strike === strike && r.Expiration === exp);
+                    let totalExposure = 0;
+                    let netGEX = 0;
+
+                    contracts.forEach(c => {
+                        const exposure = calculateExposure(c, currentGreek, spotPrice);
+                        const gamma = c.Gamma || 0;
+                        const oi = c.OpenInterest || 0;
+
+                        totalExposure += c.Type === 'CALL' ? exposure : -exposure;
+                        const gex = gamma * oi * 100 * spotPrice;
+                        netGEX += c.Type === 'CALL' ? gex : -gex;
+                    });
+
+                    matrix[strike][exp] = totalExposure;
+                    gammaMatrix[strike][exp] = netGEX;
+                });
+            });
+
+            // Find min/max for color scaling
+            let allValues = [];
+            strikes.forEach(strike => {
+                expirations.forEach(exp => {
+                    allValues.push(matrix[strike][exp]);
+                });
+            });
+
+            // Calculate statistics separately for positive and negative values
+            const positiveValues = allValues.filter(v => v > 0);
+            const negativeValues = allValues.filter(v => v < 0);
+
+            // Calculate mean and std dev for positive values
+            let posStats = { mean: 0, stdDev: 0, max: 0 };
+            if (positiveValues.length > 0) {
+                posStats.max = Math.max(...positiveValues);
+                posStats.mean = positiveValues.reduce((a, b) => a + b, 0) / positiveValues.length;
+                const variance = positiveValues.reduce((sum, val) => sum + Math.pow(val - posStats.mean, 2), 0) / positiveValues.length;
+                posStats.stdDev = Math.sqrt(variance);
+            }
+
+            // Calculate mean and std dev for negative values
+            let negStats = { mean: 0, stdDev: 0, min: 0 };
+            if (negativeValues.length > 0) {
+                negStats.min = Math.min(...negativeValues);
+                negStats.mean = negativeValues.reduce((a, b) => a + b, 0) / negativeValues.length;
+                const variance = negativeValues.reduce((sum, val) => sum + Math.pow(val - negStats.mean, 2), 0) / negativeValues.length;
+                negStats.stdDev = Math.sqrt(variance);
+            }
+
+
+            renderGrid(strikes, expirations, matrix, gammaMatrix, posStats, negStats, spotPrice);
+            updateFooter(spotPrice);
+            updateLegend(posStats.max, negStats.min);
+        }
+
+        function calculateExposure(contract, greek, spotPrice) {
+            const oi = contract.OpenInterest || 0;
+            const multiplier = 100;
+
+            if (greek === 'GEX') {
+                const gamma = contract.Gamma || 0;
+                return gamma * oi * multiplier * spotPrice * spotPrice * 0.01;
+            } else if (greek === 'VEX') {
+                const vega = contract.Vega || 0;
+                return vega * oi * multiplier;
+            } else if (greek === 'DEX') {
+                const delta = contract.Delta || 0;
+                return delta * oi * multiplier * spotPrice;
+            }
+            return 0;
+        }
+
+        function renderGrid(strikes, expirations, matrix, gammaMatrix, posStats, negStats, spotPrice) {
+            const heatmap = document.getElementById('heatmap');
+
+            // Find the strike closest to spot price (ATM strike)
+            let atmStrike = strikes[0];
+            let minDiff = Math.abs(strikes[0] - spotPrice);
+            strikes.forEach(strike => {
+                const diff = Math.abs(strike - spotPrice);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    atmStrike = strike;
+                }
+            });
+
+            // Find max positive and max negative values for star indicators
+            // Exclude zeros from consideration
+            let absMaxPositive = -Infinity;
+            let absMaxNegative = Infinity;
+            let maxPosKey = null;
+            let maxNegKey = null;
+
+            strikes.forEach(strike => {
+                expirations.forEach(exp => {
+                    const value = matrix[strike][exp];
+                    if (value > absMaxPositive && value !== 0) {
+                        absMaxPositive = value;
+                        maxPosKey = `${strike}-${exp}`;
+                    }
+                    if (value < absMaxNegative && value !== 0) {
+                        absMaxNegative = value;
+                        maxNegKey = `${strike}-${exp}`;
+                    }
+                });
+            });
+
+            let html = '<div class="grid-header">';
+            html += '<div class="strike-label">Strike</div>';
+            expirations.forEach(exp => {
+                const date = exp ? exp.split('T')[0] : 'Unknown';
+                html += `<div class="exp-header">${date}</div>`;
+            });
+            html += '</div>';
+
+            strikes.forEach(strike => {
+                // Check if this is the ATM strike
+                const isATM = strike === atmStrike;
+                const rowStyle = isATM ? ' style="border-left: 4px solid #FFD700;"' : '';
+
+                html += `<div class="grid-row"${rowStyle}>`;
+
+                // Highlight ATM strike label
+                const strikeLabelStyle = isATM ? ' style="font-weight: bold; color: #FFD700;"' : '';
+                html += `<div class="strike-label"${strikeLabelStyle}>${strike.toFixed(1)}</div>`;
+
+                expirations.forEach(exp => {
+                    const value = matrix[strike][exp];
+                    const gamma = gammaMatrix[strike][exp];
+
+                    // If value is 0, render empty cell
+                    if (value === 0) {
+                        html += `<div class="cell" style="background-color: rgb(20, 20, 20);" title="Strike: ${strike}, Exp: ${exp}, No exposure"></div>`;
+                    } else {
+                        const color = getColor(value, posStats, negStats);
+                        const cellKey = `${strike}-${exp}`;
+
+                        // Add star indicator for extreme values
+                        let star = '';
+                        if (cellKey === maxPosKey && absMaxPositive > 0) {
+                            star = '<span style="color: #FFD700;">⭐</span> '; // Yellow star for max positive (LEFT of value)
+                        } else if (cellKey === maxNegKey && absMaxNegative < 0) {
+                            star = '<span style="color: #000000;">★</span> '; // Black star for max negative (LEFT of value)
+                        }
+
+                        const displayValue = formatGamma(value);
+                        html += `<div class="cell" style="background-color: ${color};" title="Strike: ${strike}, Exp: ${exp}, ${currentGreek}: ${formatValue(value)}, Net GEX: ${formatGamma(gamma)}">${star}${displayValue}</div>`;
+                    }
+                });
+                html += '</div>';
+            });
+
+            heatmap.innerHTML = html;
+        }
+
+        function getColor(value, posStats, negStats) {
+            if (value === 0) return 'rgb(20, 20, 20)';
+
+            if (value > 0) {
+                // Positive: Use z-score (standard deviations from mean)
+                // Map z-scores to colors: 0σ = dark green, 1σ = medium green, 2σ+ = yellow
+                const zScore = posStats.stdDev > 0 ? (value - posStats.mean) / posStats.stdDev : 0;
+                const clampedZ = Math.min(Math.max(zScore, -2), 3); // Clamp to reasonable range
+
+
+                // Normalize z-score to 0-1 range (treat -2σ to +3σ as our range)
+                const normalized = (clampedZ + 2) / 5; // -2 -> 0, +3 -> 1
+
+                if (normalized >= 0.7) {
+                    // High positive (>1.5σ above mean) - Yellow/orange for outliers
+                    const factor = (normalized - 0.7) / 0.3;
+                    const r = Math.floor(160 + (180 - 160) * factor);  // Orange-yellow
+                    const g = Math.floor(120 + (140 - 120) * factor);
+                    const b = Math.floor(30 + (20 - 30) * factor);
+                    return `rgb(${r}, ${g}, ${b})`;
+                } else if (normalized >= 0.4) {
+                    // Medium positive (near mean to +1σ) - DARK green
+                    const factor = (normalized - 0.4) / 0.3;
+                    const r = Math.floor(0 + (160 - 0) * factor);      // Transitioning to yellow
+                    const g = Math.floor(100 + (120 - 100) * factor);  // Dark green base
+                    const b = Math.floor(50 + (30 - 50) * factor);
+                    return `rgb(${r}, ${g}, ${b})`;
+                } else {
+                    // Low positive (below mean) - LIGHT green
+                    const factor = normalized / 0.4;
+                    const r = Math.floor(100 + (0 - 100) * factor);
+                    const g = Math.floor(200 + (100 - 200) * factor);  // Light to dark green
+                    const b = Math.floor(120 + (50 - 120) * factor);
+                    return `rgb(${r}, ${g}, ${b})`;
+                }
+            } else {
+                // Negative: Use z-score (standard deviations from mean)
+                // Map z-scores to colors: 0σ = light blue, -1σ = medium blue, -2σ+ = purple
+                const zScore = negStats.stdDev > 0 ? (value - negStats.mean) / negStats.stdDev : 0;
+                const clampedZ = Math.min(Math.max(zScore, -3), 2); // Clamp to reasonable range
+
+                // Normalize z-score to 0-1 range (treat -3σ to +2σ as our range)
+                const normalized = (clampedZ + 3) / 5; // -3 -> 0, +2 -> 1
+
+                // Invert for negatives (more negative = higher score)
+                const inverted = 1 - normalized;
+
+                if (inverted >= 0.7) {
+                    // High negative (<-1.5σ below mean) - Dark purple zone
+                    const factor = (inverted - 0.7) / 0.3;
+                    const r = Math.floor(75 - (75 - 60) * factor);   // Darker purple
+                    const g = Math.floor(50 * (1 - factor));
+                    const b = Math.floor(140 - (140 - 110) * factor); // Darker purple
+                    return `rgb(${r}, ${g}, ${b})`;
+                } else if (inverted >= 0.4) {
+                    // Medium negative (near mean to -1σ) - Darker blue zone
+                    const factor = (inverted - 0.4) / 0.3;
+                    const r = Math.floor(70 - (70 - 75) * factor);
+                    const g = Math.floor(120 - (120 - 50) * factor);  // Much darker
+                    const b = Math.floor(160 - (160 - 140) * factor); // Darker blue
+                    return `rgb(${r}, ${g}, ${b})`;
+                } else {
+                    // Low negative (above mean) - Dark blue instead of light blue
+                    const factor = inverted / 0.4;
+                    const r = Math.floor(80 - 10 * factor);
+                    const g = Math.floor(130 - 10 * factor);  // Much darker than 200
+                    const b = Math.floor(170 - 10 * factor);  // Much darker than 255
+                    return `rgb(${r}, ${g}, ${b})`;
+                }
+            }
+        }
+
+        function formatValue(value) {
+            const abs = Math.abs(value);
+            if (abs === 0) return '$0.0K';
+            if (abs >= 1000000) return `${value >= 0 ? '' : '-'}$${(abs / 1000000).toFixed(1)}M`;
+            if (abs >= 1000) return `${value >= 0 ? '' : '-'}$${(abs / 1000).toFixed(1)}K`;
+            return `${value >= 0 ? '' : '-'}$${abs.toFixed(0)}`;
+        }
+
+        function formatGamma(gamma) {
+            const abs = Math.abs(gamma);
+            if (abs === 0) return '0';
+            // Always use K notation for consistency with comma separators
+            if (abs >= 1000) {
+                const kValue = (abs / 1000).toFixed(1);
+                const withCommas = parseFloat(kValue).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                return `${gamma >= 0 ? '+' : '-'}${withCommas}K`;
+            }
+            return `${gamma >= 0 ? '+' : '-'}${abs.toFixed(0)}`;
+        }
+
+        function updateFooter(spotPrice) {
+            const footer = document.getElementById('footer');
+            const timestamp = new Date().toLocaleString();
+            footer.innerHTML = `${currentTicker} ${currentGreek} — ${timestamp} — Current Price: $${spotPrice.toFixed(2)}`;
+        }
+
+        function updateLegend(maxAbs) {
+            const legend = document.getElementById('legend-content');
+            legend.innerHTML = `
+                <div style="margin-bottom: 8px;">
+                    <div style="width: 100%; height: 20px; background: linear-gradient(to right, rgb(74, 20, 140), rgb(0, 188, 212), rgb(0, 128, 128), rgb(76, 175, 80), rgb(170, 215, 0), rgb(255, 215, 0));"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem;">
+                    <span>-${formatValue(maxAbs)}</span>
+                    <span>+${formatValue(maxAbs)}</span>
+                </div>
+            `;
+        }
+
+        function refreshHeatmapData() {
+            if (currentTicker) loadHeatmapData(currentTicker);
+        }
+
+        // ===== ANALYTICS VIEW FUNCTIONS =====
+
+        function loadAnalyticsData(ticker) {
+            const data = analyticsData[ticker];
+            if (!data) {
+                document.getElementById('loading').innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">No analytics data for ' + ticker + '</div>';
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+
+            updateTickerInfo(data);
+            updateCalculator(data);
+            updateCharts(data);
+        }
+
+        function updateTickerInfo(data) {
+            const infoPanel = document.getElementById('ticker-info');
+            const strikes = data.strikes || {};
+            const strikeCount = Object.keys(strikes).length;
+            const totalOI = Object.values(strikes).reduce((sum, s) => sum + (s.oi || 0), 0);
+
+            infoPanel.innerHTML = `
+                <div class="info-card">
+                    <div class="info-label">Current Price</div>
+                    <div class="info-value" style="color: var(--accent-blue);">$${data.price.toFixed(2)}</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Strikes Available</div>
+                    <div class="info-value">${strikeCount}</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Total OI</div>
+                    <div class="info-value">${totalOI.toLocaleString()}</div>
+                </div>
+            `;
+            infoPanel.style.display = 'grid';
+        }
+
+        function updateCalculator(data) {
+            const price = data.price;
+            const strikes = data.strikes || {};
+            const strikeKeys = Object.keys(strikes).map(Number).sort((a, b) => a - b);
+
+            // Find key strikes near current price
+            const nearbyStrikes = strikeKeys.filter(s => Math.abs(s - price) / price <= 0.10).sort((a, b) => a - b);
+
+            // Calculate total positioning
+            let totalDelta = 0, totalGamma = 0;
+            strikeKeys.forEach(strike => {
+                const s = strikes[strike];
+                totalDelta += s.total_delta || 0;
+                totalGamma += s.total_gamma || 0;
+            });
+
+            const dealerDelta = -totalDelta;
+            const dealerGamma = -totalGamma;
+
+            const resultsHTML = `
+                <div class="metric">
+                    <div class="metric-label">Dealer Position</div>
+                    <div class="metric-value ${dealerDelta > 0 ? 'positive' : 'negative'}">
+                        ${dealerDelta > 0 ? 'LONG' : 'SHORT'} ${Math.abs(dealerDelta).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Gamma Stance</div>
+                    <div class="metric-value ${dealerGamma > 0 ? 'positive' : 'negative'}">
+                        ${dealerGamma > 0 ? 'LONG' : 'SHORT'} Γ
+                    </div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Current Price</div>
+                    <div class="metric-value" style="color: var(--accent-blue);">$${price.toFixed(2)}</div>
+                </div>
+            `;
+
+            document.getElementById('calc-results').innerHTML = resultsHTML;
+
+            // Generate detailed hedging scenarios
+            let scenariosHTML = '<h4 style="color: var(--accent-yellow); margin-bottom: 15px;">📍 Key Strike Levels & Market Maker Actions:</h4>';
+
+            // Group strikes into zones
+            const abovePrice = nearbyStrikes.filter(s => s > price).slice(0, 3);
+            const belowPrice = nearbyStrikes.filter(s => s < price).reverse().slice(0, 3);
+
+            if (belowPrice.length > 0) {
+                belowPrice.forEach(strike => {
+                    const strikeData = strikes[strike];
+                    const gamma = Math.abs(strikeData.total_gamma || 0);
+                    const delta = strikeData.total_delta || 0;
+                    const distance = ((price - strike) / price * 100).toFixed(1);
+
+                    scenariosHTML += `
+                        <div class="action-item" style="border-left-color: var(--accent-red);">
+                            <div class="action-trigger">💥 As price drops ${distance}% to $${strike.toFixed(2)}</div>
+                            <div class="action-detail">
+                                <strong style="color: var(--accent-green);">Market Maker Action: BUY shares</strong><br>
+                                • Gamma: ${gamma.toFixed(4)} - Requires hedging ${(gamma * 100).toFixed(0)} shares per $1 move<br>
+                                • Put options become more ITM, dealers long puts must buy underlying<br>
+                                • This creates <strong>supportive buying pressure</strong> as price approaches
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (abovePrice.length > 0) {
+                abovePrice.forEach(strike => {
+                    const strikeData = strikes[strike];
+                    const gamma = Math.abs(strikeData.total_gamma || 0);
+                    const delta = strikeData.total_delta || 0;
+                    const distance = ((strike - price) / price * 100).toFixed(1);
+
+                    scenariosHTML += `
+                        <div class="action-item" style="border-left-color: var(--accent-green);">
+                            <div class="action-trigger">🚀 As price rallies ${distance}% to $${strike.toFixed(2)}</div>
+                            <div class="action-detail">
+                                <strong style="color: var(--accent-red);">Market Maker Action: SELL shares</strong><br>
+                                • Gamma: ${gamma.toFixed(4)} - Requires hedging ${(gamma * 100).toFixed(0)} shares per $1 move<br>
+                                • Call options become more ITM, dealers short calls must sell underlying<br>
+                                • This creates <strong>resistance/selling pressure</strong> at this level
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            const gammaStance = dealerGamma > 0 ? "long" : "short";
+            scenariosHTML += `
+                <div style="margin-top: 20px; padding: 15px; background: var(--bg-dark); border-radius: 8px; border-left: 4px solid var(--accent-blue);">
+                    <div style="font-weight: 600; color: var(--accent-blue); margin-bottom: 8px;">💡 Market Maker Implications:</div>
+                    <div style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
+                        • Dealers are currently <strong>${gammaStance} gamma</strong>, meaning they ${dealerGamma > 0 ? 'STABILIZE price' : 'AMPLIFY moves'}<br>
+                        • ${dealerGamma > 0 ? 'They buy dips and sell rallies (supportive)' : 'They sell into weakness and buy into strength (destabilizing)'}<br>
+                        • Watch these strikes as magnets - price often gravitates toward high gamma levels
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('hedge-actions').innerHTML = scenariosHTML;
+        }
+
+        function updateCharts(data) {
+            const strikes = data.strikes || {};
+            const strikeKeys = Object.keys(strikes).map(Number).sort((a, b) => a - b);
+            const price = data.price;
+
+            const filteredStrikes = strikeKeys.filter(s => Math.abs(s - price) / price <= 0.15);
+
+            if (filteredStrikes.length < 3) {
+                const warning = '<div style="padding: 40px; text-align: center; color: var(--text-muted);">Limited data for charts</div>';
+                document.querySelectorAll('.chart-container').forEach(container => {
+                    container.innerHTML = warning;
+                });
+                return;
+            }
+
+            const gammaData = filteredStrikes.map(s => strikes[s].total_gamma || 0);
+            const deltaData = filteredStrikes.map(s => strikes[s].total_delta || 0);
+
+            // Calculate GEX (Gamma Exposure) for each strike
+            const gexData = filteredStrikes.map(s => {
+                const gamma = strikes[s].total_gamma || 0;
+                const oi = strikes[s].oi || 0;
+                return gamma * oi * 100 * s; // GEX = Gamma × OI × 100 × Strike Price
+            });
+
+            // Destroy existing charts
+            Object.values(charts).forEach(chart => chart?.destroy());
+
+            // Reset containers
+            document.getElementById('gexChart').parentElement.innerHTML = '<canvas id="gexChart"></canvas>';
+            document.getElementById('deltaChart').parentElement.innerHTML = '<canvas id="deltaChart"></canvas>';
+
+            // Create GEX chart
+            charts.gex = new Chart(document.getElementById('gexChart'), {
+                type: 'bar',
+                data: {
+                    labels: filteredStrikes.map(s => '$' + s.toFixed(0)),
+                    datasets: [{
+                        label: 'Gamma Exposure (GEX)',
+                        data: gexData,
+                        backgroundColor: gexData.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                        borderColor: gexData.map(v => v >= 0 ? '#10b981' : '#ef4444'),
+                        borderWidth: 2
+                    }]
+                },
+                options: getChartOptions()
+            });
+
+            // Create Delta chart
+            charts.delta = new Chart(document.getElementById('deltaChart'), {
+                type: 'bar',
+                data: {
+                    labels: filteredStrikes.map(s => '$' + s.toFixed(0)),
+                    datasets: [{
+                        label: 'Delta',
+                        data: deltaData,
+                        backgroundColor: deltaData.map(v => v >= 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+                        borderColor: deltaData.map(v => v >= 0 ? '#10b981' : '#ef4444'),
+                        borderWidth: 2
+                    }]
+                },
+                options: getChartOptions()
+            });
+        }
+
+        function getChartOptions() {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { color: '#2d3748' },
+                        ticks: {
+                            color: '#94a3b8',
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        grid: { color: '#2d3748' },
+                        ticks: { color: '#94a3b8' }
+                    }
+                }
+            };
+        }
+    </script>
+    <script src="auto_refresh.js"></script>
+</body>
+
+</html>
