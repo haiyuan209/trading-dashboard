@@ -116,6 +116,67 @@ def fetch_option_data(client, ticker):
         print(f"  Exception fetching {ticker}: {e}")
         return []
 
+def save_analytics_data(all_data):
+    """Generate analytics data (all_tickers_data.js) from options data"""
+    from datetime import datetime
+    timestamp = datetime.now().isoformat()
+    
+    # Aggregate data by ticker and strike for analytics view
+    ticker_data = {}
+    
+    for contract in all_data:
+        ticker = contract['Symbol']
+        strike = contract['Strike']
+        underlying_price = contract['UnderlyingPrice']
+        
+        if ticker not in ticker_data:
+            ticker_data[ticker] = {
+                'price': underlying_price,
+                'timestamp': timestamp,
+                'strikes': {}
+            }
+        
+        if strike not in ticker_data[ticker]['strikes']:
+            ticker_data[ticker]['strikes'][strike] = {
+                'total_delta': 0,
+                'total_gamma': 0,
+                'total_theta': 0,
+                'total_vega': 0,
+                'oi': 0,
+                'volume': 0
+            }
+        
+        # Aggregate Greeks weighted by open interest
+        oi = contract.get('OpenInterest', 0)
+        volume = contract.get('Volume', 0)
+        
+        ticker_data[ticker]['strikes'][strike]['total_delta'] += (contract.get('Delta', 0) * oi)
+        ticker_data[ticker]['strikes'][strike]['total_gamma'] += (contract.get('Gamma', 0) * oi)
+        ticker_data[ticker]['strikes'][strike]['total_theta'] += (contract.get('Theta', 0) * oi)
+        ticker_data[ticker]['strikes'][strike]['total_vega'] += (contract.get('Vega', 0) * oi)
+        ticker_data[ticker]['strikes'][strike]['oi'] += oi
+        ticker_data[ticker]['strikes'][strike]['volume'] += volume
+    
+    # Build output structure
+    output = {
+        'metadata': {
+            'total_tickers': len(ticker_data),
+            'generated_at': timestamp,
+            'tickers': list(ticker_data.keys())
+        },
+        'data': ticker_data
+    }
+    
+    # Save as JavaScript file
+    js_content = f"// Auto-generated ticker data\n// Generated: {timestamp}\n// Total tickers: {len(ticker_data)}\n\n"
+    js_content += f"const TICKER_DATA = {json.dumps(output, indent=2)};\n"
+    
+    with open('all_tickers_data.js', 'w', encoding='utf-8') as f:
+        f.write(js_content)
+    
+    print(f"[OK] Saved {len(ticker_data)} tickers to all_tickers_data.js")
+
+
 def main():
     client = get_client()
     if not client:
@@ -167,6 +228,9 @@ def main():
             
     with open('option_data.js', 'w', encoding='utf-8') as f:
         f.write(f"const OPTION_DATA = {json.dumps(all_rows)};")
+    
+    # Also generate analytics data for analytics view
+    save_analytics_data(all_rows)
         
     print(f"Done! Data saved to {output_file} and option_data.js")
 
