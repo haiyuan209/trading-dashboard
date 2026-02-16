@@ -235,7 +235,7 @@ def _fetch_one(client, ticker):
         return ticker, []
 
 
-PARALLEL_WORKERS = 10  # concurrent API calls
+PARALLEL_WORKERS = 5  # concurrent API calls (5 = safe for 1GB RAM servers)
 
 
 def main():

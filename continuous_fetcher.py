@@ -277,7 +277,7 @@ def fetch_all_tickers():
     # Limit tickers to avoid overwhelming API
     tickers_to_fetch = TOP_100_LIQUID_OPTIONS[:MAX_TICKERS_PER_CYCLE]
     total_tickers = len(tickers_to_fetch)
-    PARALLEL_WORKERS = 10
+    PARALLEL_WORKERS = 5
 
     log.info("Fetching %d tickers with %d parallel workers...", total_tickers, PARALLEL_WORKERS)
     start_time = time.time()
