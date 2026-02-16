@@ -1,6 +1,7 @@
 # Environment variables
 .env
 *.env
+token.json
 
 # Python cache
 __pycache__/

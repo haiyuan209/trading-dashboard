@@ -1,0 +1,20 @@
+[Unit]
+Description=Trading Data Continuous Fetcher
+After=network.target trading-api.service
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/trading
+Environment=PATH=/home/ubuntu/trading/venv/bin:/usr/bin:/bin
+EnvironmentFile=/home/ubuntu/trading/.env
+
+# Run continuous_fetcher in headless mode (no input() prompts)
+ExecStart=/home/ubuntu/trading/venv/bin/python -c "from continuous_fetcher import fetch_all_tickers, run_continuous; fetch_all_tickers(); run_continuous()"
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/ubuntu/trading/logs/fetcher.log
+StandardError=append:/home/ubuntu/trading/logs/fetcher.log
+
+[Install]
+WantedBy=multi-user.target
