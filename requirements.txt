@@ -1,2 +1,9 @@
 schwab-py
 python-dotenv
+pyyaml
+fastapi
+uvicorn[standard]
+plyer
+httpx
+pytest
+pytz

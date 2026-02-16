@@ -1,6 +1,6 @@
 """
 Market Hours Runner for Continuous Fetcher
-Runs continuous_fetcher.py only during market hours (9:30 AM - 4:00 PM ET, Mon-Fri)
+Runs continuous_fetcher.py only during market hours (configurable via config.yaml)
 """
 
 import time
@@ -8,81 +8,91 @@ import sys
 from datetime import datetime, time as dt_time
 import pytz
 from continuous_fetcher import fetch_all_tickers
+from config import load_config
+from logger import get_logger
 
-# Market hours (Eastern Time)
-MARKET_OPEN = dt_time(9, 30)   # 9:30 AM ET
-MARKET_CLOSE = dt_time(16, 0)  # 4:00 PM ET
-REFRESH_INTERVAL = 60  # 1 minute
+log = get_logger("market_hours_runner")
+cfg = load_config()
+
+# Parse market hours from config
+_open_parts = cfg.market_hours.open.split(":")
+_close_parts = cfg.market_hours.close.split(":")
+MARKET_OPEN = dt_time(int(_open_parts[0]), int(_open_parts[1]))
+MARKET_CLOSE = dt_time(int(_close_parts[0]), int(_close_parts[1]))
+REFRESH_INTERVAL = cfg.fetcher.refresh_interval
+TIMEZONE = cfg.market_hours.timezone
 
 def is_market_hours():
     """Check if current time is during market hours"""
-    et = pytz.timezone('America/New_York')
+    et = pytz.timezone(TIMEZONE)
     now_et = datetime.now(et)
-    
+
     # Check if weekday (0=Monday, 6=Sunday)
     if now_et.weekday() >= 5:  # Saturday or Sunday
         return False
-    
+
     # Check if within market hours
     current_time = now_et.time()
     return MARKET_OPEN <= current_time <= MARKET_CLOSE
 
 def wait_for_market_open():
     """Wait until market opens"""
-    et = pytz.timezone('America/New_York')
-    
+    et = pytz.timezone(TIMEZONE)
+
     while not is_market_hours():
         now_et = datetime.now(et)
         current_time = now_et.time()
-        
+
         if now_et.weekday() >= 5:
             # Weekend - wait until Monday
-            print(f"[{now_et.strftime('%Y-%m-%d %H:%M:%S %Z')}] Weekend - Market closed")
+            log.info("[%s] Weekend - Market closed", now_et.strftime('%Y-%m-%d %H:%M:%S %Z'))
             time.sleep(3600)  # Check every hour
         elif current_time < MARKET_OPEN:
             # Before market open
-            minutes_until_open = ((datetime.combine(now_et.date(), MARKET_OPEN) - 
+            minutes_until_open = ((datetime.combine(now_et.date(), MARKET_OPEN) -
                                   datetime.combine(now_et.date(), current_time)).seconds // 60)
-            print(f"[{now_et.strftime('%Y-%m-%d %H:%M:%S %Z')}] Market opens in {minutes_until_open} minutes")
+            log.info("[%s] Market opens in %d minutes",
+                     now_et.strftime('%Y-%m-%d %H:%M:%S %Z'), minutes_until_open)
             time.sleep(60)  # Check every minute
         else:
             # After market close
-            print(f"[{now_et.strftime('%Y-%m-%d %H:%M:%S %Z')}] Market closed for today")
+            log.info("[%s] Market closed for today", now_et.strftime('%Y-%m-%d %H:%M:%S %Z'))
             time.sleep(3600)  # Check every hour
 
 def run_during_market_hours():
     """Run continuous fetcher only during market hours"""
-    et = pytz.timezone('America/New_York')
-    
-    print("="*70)
-    print("CONTINUOUS FETCHER - MARKET HOURS MODE")
-    print("="*70)
-    print(f"Market Hours: {MARKET_OPEN.strftime('%I:%M %p')} - {MARKET_CLOSE.strftime('%I:%M %p')} ET")
-    print(f"Refresh Interval: {REFRESH_INTERVAL} seconds")
-    print("="*70)
-    print()
-    
+    et = pytz.timezone(TIMEZONE)
+
+    log.info("=" * 70)
+    log.info("CONTINUOUS FETCHER - MARKET HOURS MODE")
+    log.info("=" * 70)
+    log.info("Market Hours: %s - %s %s",
+             MARKET_OPEN.strftime('%I:%M %p'), MARKET_CLOSE.strftime('%I:%M %p'), TIMEZONE)
+    log.info("Refresh Interval: %d seconds", REFRESH_INTERVAL)
+    log.info("=" * 70)
+
     try:
         while True:
             if is_market_hours():
                 now_et = datetime.now(et)
-                print(f"\\n[{now_et.strftime('%Y-%m-%d %H:%M:%S %Z')}] Market is OPEN - Fetching data...")
-                
+                log.info("[%s] Market is OPEN - Fetching data...",
+                         now_et.strftime('%Y-%m-%d %H:%M:%S %Z'))
+
                 try:
                     fetch_all_tickers()
-                    print(f"[OK] Data updated successfully")
+                    log.info("Data updated successfully")
                 except Exception as e:
-                    print(f"[ERROR] Fetch failed: {e}")
-                
+                    log.error("Fetch failed: %s", e)
+
                 # Wait for next interval
                 time.sleep(REFRESH_INTERVAL)
             else:
                 now_et = datetime.now(et)
-                print(f"\\n[{now_et.strftime('%Y-%m-%d %H:%M:%S %Z')}] Market is CLOSED")
+                log.info("[%s] Market is CLOSED", now_et.strftime('%Y-%m-%d %H:%M:%S %Z'))
                 wait_for_market_open()
-                
+
     except KeyboardInterrupt:
-        print("\\n\\nStopped by user")
+        log.info("Stopped by user")
         sys.exit(0)
 
 if __name__ == "__main__":

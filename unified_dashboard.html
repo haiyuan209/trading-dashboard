@@ -63,20 +63,40 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .view-selector {
-            padding: 10px 20px;
-            background: var(--bg-dark);
-            border: 2px solid var(--border);
+        .btn-group {
+            display: flex;
+            gap: 0;
             border-radius: 8px;
-            color: var(--text-main);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
+            overflow: hidden;
+            border: 1px solid var(--border);
         }
 
-        .view-selector:hover {
-            border-color: var(--accent-blue);
+        .btn-toggle {
+            padding: 8px 18px;
+            background: var(--bg-dark);
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            border-right: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .btn-toggle:last-child {
+            border-right: none;
+        }
+
+        .btn-toggle:hover {
+            background: rgba(96, 165, 250, 0.1);
+            color: var(--text-main);
+        }
+
+        .btn-toggle.active {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.25), rgba(16, 185, 129, 0.15));
+            color: #60a5fa;
+            box-shadow: inset 0 -2px 0 0 #60a5fa;
         }
 
         .ticker-selector {
@@ -203,13 +223,11 @@
             z-index: 10;
         }
 
-        .legend {
-            width: 140px;
-            min-width: 140px;
-            background: var(--bg-card);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
+        .legend-inline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
             flex-shrink: 0;
         }
 
@@ -347,6 +365,208 @@
             padding: 40px;
             color: var(--text-muted);
         }
+
+        /* Staleness Banner */
+        .staleness-banner {
+            display: none;
+            background: linear-gradient(90deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
+            border: 1px solid var(--accent-red);
+            border-radius: 8px;
+            padding: 10px 20px;
+            margin-bottom: 15px;
+            color: var(--accent-red);
+            font-weight: 600;
+            font-size: 0.9rem;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .staleness-banner.visible {
+            display: flex;
+        }
+
+        /* GEX Profile View */
+        .gex-profile-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .gex-profile-container .card {
+            margin-bottom: 0;
+        }
+
+        /* Alerts Panel */
+        .alert-item {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .alert-item.critical {
+            background: rgba(239, 68, 68, 0.15);
+            border-left: 4px solid var(--accent-red);
+        }
+
+        .alert-item.warning {
+            background: rgba(251, 191, 36, 0.15);
+            border-left: 4px solid var(--accent-yellow);
+        }
+
+        .alert-item.info {
+            background: rgba(59, 130, 246, 0.15);
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .alert-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Multi-ticker comparison */
+        .compare-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+
+        .compare-controls input {
+            width: 120px;
+        }
+
+        /* Plays Tab */
+        .plays-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .plays-table th {
+            text-align: left;
+            padding: 12px 10px;
+            border-bottom: 2px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .plays-table th:hover {
+            color: var(--accent-blue);
+        }
+
+        .plays-table td {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .plays-table tr:hover {
+            background: rgba(59, 130, 246, 0.06);
+        }
+
+        .score-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            min-width: 42px;
+            text-align: center;
+        }
+
+        .score-badge.high {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .score-badge.med {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .score-badge.low {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .dir-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .dir-tag.BULLISH {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        .dir-tag.BEARISH {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .dir-tag.NEUTRAL {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+        }
+
+        .signal-breakdown {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        .signal-bar {
+            display: inline-block;
+            height: 6px;
+            border-radius: 3px;
+            margin-right: 2px;
+            vertical-align: middle;
+        }
+
+        .plays-disclaimer {
+            padding: 10px 16px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            background: rgba(251, 191, 36, 0.08);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            font-size: 0.8rem;
+        }
+
+        .auto-refresh-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--accent-green);
+            margin-left: 15px;
+        }
+
+        .auto-refresh-indicator .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
@@ -356,10 +576,13 @@
         <div class="header">
             <div class="header-left">
                 <h1>📊 Options Trading Dashboard</h1>
-                <select class="view-selector" id="view-selector">
-                    <option value="heatmap">Heatmap View</option>
-                    <option value="analytics">Analytics View</option>
-                </select>
+                <div class="btn-group" id="view-buttons">
+                    <button class="btn-toggle active" data-view="heatmap">🗺️ Heatmap</button>
+                    <button class="btn-toggle" data-view="analytics">📊 Analytics</button>
+                    <button class="btn-toggle" data-view="gex-profile">📈 GEX Profile</button>
+                    <button class="btn-toggle" data-view="plays">🎯 Plays</button>
+                    <button class="btn-toggle" data-view="alerts">🔔 Alerts</button>
+                </div>
             </div>
             <div class="ticker-selector">
                 <input type="text" id="ticker-search" placeholder="Select ticker..." autocomplete="off">
@@ -372,17 +595,18 @@
             <div class="controls"
                 style="display: flex; align-items: center; justify-content: flex-start; flex-wrap: wrap; gap: 15px;">
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <label>
-                        Greek:
-                        <select id="greek-select">
-                            <option value="GEX">Gamma Exposure (GEX)</option>
-                            <option value="VEX">Vega Exposure (VEX)</option>
-                        </select>
-                    </label>
+                    <div class="btn-group" id="greek-buttons">
+                        <button class="btn-toggle active" data-greek="GEX">Gamma (GEX)</button>
+                        <button class="btn-toggle" data-greek="VEX">Vega (VEX)</button>
+                    </div>
                     <button onclick="refreshHeatmapData()">Refresh</button>
                 </div>
                 <div id="footer"
                     style="flex: 1; text-align: center; color: var(--accent-blue); font-size: 0.9rem; font-weight: 500;">
+                </div>
+                <div class="legend-inline">
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Scale:</span>
+                    <div id="legend-content" style="display: flex; align-items: center; gap: 6px;"></div>
                 </div>
             </div>
 
@@ -390,11 +614,13 @@
                 <div class="heatmap-grid">
                     <div id="heatmap"></div>
                 </div>
-                <div class="legend">
-                    <div style="font-weight: bold; margin-bottom: 10px; color: var(--accent-blue);">Scale</div>
-                    <div id="legend-content"></div>
-                </div>
             </div>
+        </div>
+
+        <!-- Staleness Warning Banner -->
+        <div id="staleness-banner" class="staleness-banner">
+            <span>⚠️</span>
+            <span id="staleness-msg">Data may be stale</span>
         </div>
     </div>
 
@@ -437,7 +663,58 @@
         </div>
     </div>
 
+    <!-- GEX Profile View -->
+    <div id="gex-profile-view" class="hidden" style="max-width:1800px;margin:0 auto;">
+        <div class="gex-profile-container">
+            <div class="card">
+                <div class="card-title">📈 Net GEX by Strike</div>
+                <div class="chart-container" style="height:400px;"><canvas id="gexProfileChart"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-title">⚖️ Put/Call OI Ratio by Strike</div>
+                <div class="chart-container" style="height:400px;"><canvas id="pcRatioChart"></canvas></div>
+            </div>
+        </div>
+        <div class="card" style="margin-top:20px;">
+            <div class="card-title">🔄 Multi-Ticker GEX Comparison</div>
+            <div class="compare-controls">
+                <input type="text" id="compare-t1" placeholder="Ticker 1" value="SPY"
+                    style="padding:8px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;color:var(--text-main);">
+                <input type="text" id="compare-t2" placeholder="Ticker 2" value="QQQ"
+                    style="padding:8px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;color:var(--text-main);">
+                <input type="text" id="compare-t3" placeholder="Ticker 3" value="IWM"
+                    style="padding:8px;background:var(--bg-dark);border:1px solid var(--border);border-radius:6px;color:var(--text-main);">
+                <button onclick="loadMultiTicker()" style="padding:8px 16px;">Compare</button>
+            </div>
+            <div class="chart-container" style="height:400px;"><canvas id="compareChart"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Plays View -->
+    <div id="plays-view" class="hidden" style="max-width:1400px;margin:0 auto;">
+        <div class="plays-disclaimer">⚠️ NOT financial advice. Scores reflect signal strength for
+            educational/informational purposes only. Always do your own research.</div>
+        <div class="card">
+            <div class="card-title">🎯 Trade Recommendations <span class="auto-refresh-indicator"><span
+                        class="dot"></span>Live</span></div>
+            <div id="plays-list">
+                <div class="loading">Loading recommendations...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alerts View -->
+    <div id="alerts-view" class="hidden" style="max-width:1200px;margin:0 auto;">
+        <div class="card">
+            <div class="card-title">🔔 Recent Alerts</div>
+            <div id="alerts-list">
+                <div class="loading">Loading alerts...</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Data Sources -->
+
     <script src="option_data.js"></script>
     <script src="all_tickers_data.js"></script>
     <script src="ticker_metadata.js"></script>
@@ -449,15 +726,33 @@
         let charts = {};
         let heatmapData = [];
         let analyticsData = {};
+        let dataTimestamp = null;
+        const API_BASE = window.location.origin;
+        const STALENESS_MINUTES = 5;
 
         // Initialize on load
-        window.addEventListener('load', () => {
-            initializeData();
+        window.addEventListener('load', async () => {
+            await initializeData();
             initializeViewSwitcher();
             initializeTickerSearch();
+            setInterval(checkStaleness, 30000); // Check every 30s
         });
 
-        function initializeData() {
+        async function initializeData() {
+            // Try API first, fall back to static JS files
+            let apiSuccess = false;
+            try {
+                const healthResp = await fetch(`${API_BASE}/api/health`);
+                if (healthResp.ok) {
+                    const health = await healthResp.json();
+                    dataTimestamp = health.last_updated;
+                    apiSuccess = true;
+                    console.log('[API] Server responding, loading from API');
+                }
+            } catch (e) {
+                console.log('[API] Server not available, using static JS files');
+            }
+
             // Load heatmap data
             if (typeof OPTION_DATA !== 'undefined') {
                 heatmapData = OPTION_DATA;
@@ -477,78 +772,111 @@
                         const numericKey = parseFloat(strikeKey);
                         analyticsData[ticker].strikes[numericKey] = rawData[ticker].strikes[strikeKey];
                     }
+                    if (!dataTimestamp) dataTimestamp = rawData[ticker].timestamp;
                 }
                 console.log('[OK] Loaded analytics data:', Object.keys(analyticsData).length, 'tickers');
             }
+            checkStaleness();
         }
 
         function initializeViewSwitcher() {
-            const selector = document.getElementById('view-selector');
-            selector.addEventListener('change', (e) => {
-                currentView = e.target.value;
-                switchView();
+            document.querySelectorAll('#view-buttons .btn-toggle').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#view-buttons .btn-toggle').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentView = btn.dataset.view;
+                    switchView();
+                });
             });
         }
 
         function switchView() {
-            const heatmapView = document.getElementById('heatmap-view');
-            const analyticsView = document.getElementById('analytics-view');
+            const views = ['heatmap-view', 'analytics-view', 'gex-profile-view', 'plays-view', 'alerts-view'];
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
 
             if (currentView === 'heatmap') {
-                heatmapView.classList.remove('hidden');
-                analyticsView.classList.add('hidden');
+                document.getElementById('heatmap-view').classList.remove('hidden');
                 if (currentTicker) loadHeatmapData(currentTicker);
-            } else {
-                heatmapView.classList.add('hidden');
-                analyticsView.classList.remove('hidden');
+            } else if (currentView === 'analytics') {
+                document.getElementById('analytics-view').classList.remove('hidden');
                 if (currentTicker) loadAnalyticsData(currentTicker);
+            } else if (currentView === 'gex-profile') {
+                document.getElementById('gex-profile-view').classList.remove('hidden');
+                if (currentTicker) loadGexProfile(currentTicker);
+            } else if (currentView === 'plays') {
+                document.getElementById('plays-view').classList.remove('hidden');
+                loadPlays();
+            } else if (currentView === 'alerts') {
+                document.getElementById('alerts-view').classList.remove('hidden');
+                loadAlerts();
             }
         }
 
-        function initializeTickerSearch() {
-            const searchInput = document.getElementById('ticker-search');
+        // Normalise user input: strip leading '$' and uppercase
+        function normalizeTicker(raw) {
+            return raw.replace(/^\$/, '').toUpperCase().trim();
+        }
 
-            // Get unique tickers from both data sources
+        // Build (or rebuild) the ticker suggestion list from loaded data
+        function getAvailableTickers() {
             const heatmapTickers = [...new Set(heatmapData.map(d => d.Symbol))];
             const analyticsTickers = Object.keys(analyticsData);
-            const allTickers = [...new Set([...heatmapTickers, ...analyticsTickers])].sort();
+            return [...new Set([...heatmapTickers, ...analyticsTickers])].sort();
+        }
 
-            console.log('[Search] Available tickers:', allTickers.length, allTickers.slice(0, 10));
-
-            // Create autocomplete datalist
-            const datalist = document.createElement('datalist');
-            datalist.id = 'ticker-suggestions';
+        function rebuildTickerSuggestions() {
+            const allTickers = getAvailableTickers();
+            let datalist = document.getElementById('ticker-suggestions');
+            if (!datalist) {
+                datalist = document.createElement('datalist');
+                datalist.id = 'ticker-suggestions';
+                document.body.appendChild(datalist);
+                document.getElementById('ticker-search').setAttribute('list', 'ticker-suggestions');
+            }
+            datalist.innerHTML = '';
             allTickers.forEach(ticker => {
                 const option = document.createElement('option');
                 option.value = ticker;
                 datalist.appendChild(option);
             });
-            document.body.appendChild(datalist);
-            searchInput.setAttribute('list', 'ticker-suggestions');
+            console.log('[Search] Available tickers:', allTickers.length, allTickers.slice(0, 10));
+            return allTickers;
+        }
+
+        function initializeTickerSearch() {
+            const searchInput = document.getElementById('ticker-search');
+            const allTickers = rebuildTickerSuggestions();
 
             // Search on Enter key
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    const value = e.target.value.toUpperCase().trim();
+                    const value = normalizeTicker(e.target.value);
+                    const available = getAvailableTickers();
                     console.log('[Search] Enter pressed, searching for:', value);
-                    if (allTickers.includes(value)) {
+                    if (available.includes(value)) {
                         console.log('[Search] Ticker found! Selecting:', value);
                         selectTicker(value);
                     } else {
-                        console.log('[Search] Ticker not found:', value);
+                        console.log('[Search] Ticker not found:', value, '(available:', available.length, ')');
                         // Show error feedback
                         searchInput.style.borderColor = 'var(--accent-red)';
+                        searchInput.setAttribute('placeholder', value + ' not found — try without $');
                         setTimeout(() => {
                             searchInput.style.borderColor = '';
-                        }, 1000);
+                            searchInput.setAttribute('placeholder', 'Select ticker...');
+                        }, 2000);
                     }
                 }
             });
 
             // Auto-select on exact match while typing
             searchInput.addEventListener('input', (e) => {
-                const value = e.target.value.toUpperCase();
-                if (value.length > 0 && allTickers.includes(value)) {
+                const value = normalizeTicker(e.target.value);
+                const available = getAvailableTickers();
+                if (value.length > 0 && available.includes(value)) {
                     selectTicker(value);
                 }
             });
@@ -574,8 +902,10 @@
 
             if (currentView === 'heatmap') {
                 loadHeatmapData(ticker);
-            } else {
+            } else if (currentView === 'analytics') {
                 loadAnalyticsData(ticker);
+            } else if (currentView === 'gex-profile') {
+                loadGexProfile(ticker);
             }
         }
 
@@ -583,9 +913,13 @@
 
         let currentGreek = 'GEX';
 
-        document.getElementById('greek-select')?.addEventListener('change', (e) => {
-            currentGreek = e.target.value;
-            if (currentTicker) loadHeatmapData(currentTicker);
+        document.querySelectorAll('#greek-buttons .btn-toggle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#greek-buttons .btn-toggle').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentGreek = btn.dataset.greek;
+                if (currentTicker) loadHeatmapData(currentTicker);
+            });
         });
 
         function loadHeatmapData(ticker) {
@@ -689,7 +1023,8 @@
 
             if (greek === 'GEX') {
                 const gamma = contract.Gamma || 0;
-                return gamma * oi * multiplier * spotPrice * spotPrice * 0.01;
+                // Standard Net GEX: Gamma × OI × 100 × Spot
+                return gamma * oi * multiplier * spotPrice;
             } else if (greek === 'VEX') {
                 const vega = contract.Vega || 0;
                 return vega * oi * multiplier;
@@ -884,19 +1219,16 @@
         function updateLegend(maxAbs) {
             const legend = document.getElementById('legend-content');
             legend.innerHTML = `
-                <div style="margin-bottom: 8px;">
-                    <div style="width: 100%; height: 20px; background: linear-gradient(to right, rgb(74, 20, 140), rgb(0, 188, 212), rgb(0, 128, 128), rgb(76, 175, 80), rgb(170, 215, 0), rgb(255, 215, 0));"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.75rem;">
-                    <span>-${formatValue(maxAbs)}</span>
-                    <span>+${formatValue(maxAbs)}</span>
-                </div>
+                <span style="font-size: 0.7rem; color: var(--text-muted);">-${formatValue(maxAbs)}</span>
+                <div style="width: 180px; height: 12px; border-radius: 4px; background: linear-gradient(to right, rgb(74, 20, 140), rgb(0, 188, 212), rgb(0, 128, 128), rgb(76, 175, 80), rgb(170, 215, 0), rgb(255, 215, 0));"></div>
+                <span style="font-size: 0.7rem; color: var(--text-muted);">+${formatValue(maxAbs)}</span>
             `;
         }
 
         function refreshHeatmapData() {
             if (currentTicker) loadHeatmapData(currentTicker);
         }
+
 
         // ===== ANALYTICS VIEW FUNCTIONS =====
 
@@ -1130,8 +1462,336 @@
                 }
             };
         }
+
+        // === STALENESS DETECTION ===
+        function checkStaleness() {
+            const banner = document.getElementById('staleness-banner');
+            const msg = document.getElementById('staleness-msg');
+            if (!dataTimestamp || !banner) return;
+
+            const updated = new Date(dataTimestamp);
+            const ageMs = Date.now() - updated.getTime();
+            const ageMin = Math.round(ageMs / 60000);
+
+            if (ageMin > STALENESS_MINUTES) {
+                msg.textContent = `⚠️ Data is ${ageMin} minutes old (last updated: ${updated.toLocaleTimeString()}). May be stale.`;
+                banner.classList.add('visible');
+            } else {
+                banner.classList.remove('visible');
+            }
+        }
+
+        // === GEX PROFILE VIEW ===
+        function loadGexProfile(ticker) {
+            if (!ticker) return;
+            const data = analyticsData[ticker];
+            if (!data || !data.strikes) {
+                console.warn('[GEX Profile] No data for', ticker);
+                return;
+            }
+
+            const price = data.price || 0;
+            const allStrikes = Object.keys(data.strikes).map(Number).sort((a, b) => a - b);
+            // Filter to ±15% of price
+            const lo = price * 0.85, hi = price * 1.15;
+            const strikes = allStrikes.filter(s => s >= lo && s <= hi);
+
+            // Net GEX per strike
+            const gexVals = strikes.map(s => {
+                const sd = data.strikes[s];
+                return (sd.total_gamma || 0) * price * 100;
+            });
+
+            // Put/Call OI Ratio per strike from raw heatmap data
+            const tickerContracts = heatmapData.filter(c => c.Symbol === ticker);
+            const callOI = {}, putOI = {};
+            tickerContracts.forEach(c => {
+                const s = parseFloat(c.Strike);
+                if (c.Type === 'CALL') callOI[s] = (callOI[s] || 0) + (c.OpenInterest || 0);
+                else if (c.Type === 'PUT') putOI[s] = (putOI[s] || 0) + (c.OpenInterest || 0);
+            });
+            const pcRatios = strikes.map(s => {
+                const co = callOI[s] || 0;
+                const po = putOI[s] || 0;
+                return co > 0 ? (po / co) : 0;
+            });
+
+            // Destroy old charts
+            if (charts.gexProfile) charts.gexProfile.destroy();
+            if (charts.pcRatio) charts.pcRatio.destroy();
+
+            // GEX Profile Chart
+            charts.gexProfile = new Chart(document.getElementById('gexProfileChart'), {
+                type: 'bar',
+                data: {
+                    labels: strikes.map(s => '$' + s.toFixed(0)),
+                    datasets: [{
+                        label: `${ticker} Net GEX`,
+                        data: gexVals,
+                        backgroundColor: gexVals.map(v => v >= 0 ? 'rgba(16,185,129,0.7)' : 'rgba(239,68,68,0.7)'),
+                        borderColor: gexVals.map(v => v >= 0 ? '#10b981' : '#ef4444'),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...getChartOptions(),
+                    plugins: {
+                        legend: { display: true, labels: { color: '#e2e8f0' } },
+                        annotation: price > 0 ? {
+                            annotations: {
+                                priceLine: {
+                                    type: 'line', scaleID: 'x',
+                                    value: '$' + Math.round(price),
+                                    borderColor: '#fbbf24', borderWidth: 2, borderDash: [5, 5],
+                                    label: { display: true, content: 'Price', color: '#fbbf24' }
+                                }
+                            }
+                        } : {}
+                    }
+                }
+            });
+
+            // P/C Ratio Chart
+            charts.pcRatio = new Chart(document.getElementById('pcRatioChart'), {
+                type: 'bar',
+                data: {
+                    labels: strikes.map(s => '$' + s.toFixed(0)),
+                    datasets: [{
+                        label: 'Put/Call OI Ratio',
+                        data: pcRatios,
+                        backgroundColor: pcRatios.map(v => v > 1 ? 'rgba(239,68,68,0.6)' : 'rgba(59,130,246,0.6)'),
+                        borderColor: pcRatios.map(v => v > 1 ? '#ef4444' : '#3b82f6'),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...getChartOptions(),
+                    plugins: {
+                        legend: { display: true, labels: { color: '#e2e8f0' } },
+                    }
+                }
+            });
+        }
+
+        // === MULTI-TICKER COMPARISON ===
+        async function loadMultiTicker() {
+            const t1 = document.getElementById('compare-t1').value.toUpperCase().trim();
+            const t2 = document.getElementById('compare-t2').value.toUpperCase().trim();
+            const t3 = document.getElementById('compare-t3').value.toUpperCase().trim();
+            const tickers = [t1, t2, t3].filter(t => t && analyticsData[t]);
+
+            if (charts.compare) charts.compare.destroy();
+
+            const colors = ['#10b981', '#3b82f6', '#f59e0b'];
+            const datasets = tickers.map((ticker, i) => {
+                const data = analyticsData[ticker];
+                const price = data.price || 0;
+                const allStrikes = Object.keys(data.strikes).map(Number).sort((a, b) => a - b);
+                const lo = price * 0.9, hi = price * 1.1;
+                const strikes = allStrikes.filter(s => s >= lo && s <= hi);
+
+                // Normalize strikes as % from price
+                return {
+                    label: ticker,
+                    data: strikes.map(s => ({
+                        x: ((s - price) / price * 100).toFixed(1) + '%',
+                        y: (data.strikes[s].total_gamma || 0) * price * 100
+                    })),
+                    backgroundColor: colors[i] + '99',
+                    borderColor: colors[i],
+                    borderWidth: 1
+                };
+            });
+
+            charts.compare = new Chart(document.getElementById('compareChart'), {
+                type: 'bar',
+                data: { datasets },
+                options: {
+                    ...getChartOptions(),
+                    parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+                    plugins: { legend: { display: true, labels: { color: '#e2e8f0' } } }
+                }
+            });
+        }
+
+        // === ALERTS VIEW ===
+        async function loadAlerts() {
+            const list = document.getElementById('alerts-list');
+            let alerts = [];
+
+            // Try API first
+            try {
+                const resp = await fetch(`${API_BASE}/api/alerts/recent?hours=24`);
+                if (resp.ok) {
+                    const data = await resp.json();
+                    alerts = data.alerts || [];
+                }
+            } catch (e) {
+                console.log('[Alerts] API not available');
+            }
+
+            if (alerts.length === 0) {
+                list.innerHTML = '<div class="loading">No recent alerts. Alerts appear here when GEX flips, gamma walls shift, or price approaches key levels.</div>';
+                return;
+            }
+
+            list.innerHTML = alerts.map(a => {
+                const sev = (a.alert_type === 'gex_flip') ? 'critical' :
+                    (a.alert_type === 'price_near_wall') ? 'warning' : 'info';
+                const time = new Date(a.timestamp).toLocaleString();
+                return `<div class="alert-item ${sev}">
+                    <div>${a.message}</div>
+                    ${a.details ? `<div style="font-size:0.8rem;color:var(--text-muted);margin-top:4px;">${a.details}</div>` : ''}
+                    <div class="alert-time">${time}</div>
+                </div>`;
+            }).join('');
+        }
+        // === PLAYS VIEW ===
+        let playsSortField = 'score';
+        let playsSortDir = -1; // -1 desc, 1 asc
+
+        async function loadPlays() {
+            const container = document.getElementById('plays-list');
+            try {
+                const resp = await fetch(`${API_BASE}/api/recommendations`);
+                if (!resp.ok) throw new Error('API unavailable');
+                const data = await resp.json();
+                const recs = data.recommendations || [];
+
+                if (recs.length === 0) {
+                    container.innerHTML = '<div class="loading">No recommendations yet. Run the fetcher to generate plays.</div>';
+                    return;
+                }
+
+                // Sort
+                recs.sort((a, b) => {
+                    if (playsSortField === 'score') return (a.score - b.score) * playsSortDir;
+                    if (playsSortField === 'ticker') return a.ticker.localeCompare(b.ticker) * playsSortDir;
+                    if (playsSortField === 'direction') return a.direction.localeCompare(b.direction) * playsSortDir;
+                    return 0;
+                });
+
+                const arrow = playsSortDir === -1 ? ' ▼' : ' ▲';
+                container.innerHTML = `
+                    <table class="plays-table">
+                        <thead><tr>
+                            <th onclick="sortPlays('score')">Score${playsSortField === 'score' ? arrow : ''}</th>
+                            <th onclick="sortPlays('ticker')">Ticker${playsSortField === 'ticker' ? arrow : ''}</th>
+                            <th onclick="sortPlays('direction')">Direction${playsSortField === 'direction' ? arrow : ''}</th>
+                            <th>Play Type</th>
+                            <th>Reasoning</th>
+                            <th>Risk</th>
+                        </tr></thead>
+                        <tbody>${recs.map(r => {
+                    const sc = r.score >= 70 ? 'high' : r.score >= 40 ? 'med' : 'low';
+                    // Build signal bars
+                    const bars = (r.signals || []).map(s => {
+                        const pct = s.max_score > 0 ? (s.score / s.max_score * 100) : 0;
+                        const color = pct >= 70 ? '#10b981' : pct >= 40 ? '#fbbf24' : '#ef4444';
+                        return `<span title="${s.name}: ${s.score}/${s.max_score} — ${s.detail}" class="signal-bar" style="width:${Math.max(pct * 0.6, 4)}px;background:${color}"></span>`;
+                    }).join('');
+                    return `<tr>
+                                <td><span class="score-badge ${sc}">${r.score}</span><div class="signal-breakdown">${bars}</div></td>
+                                <td style="font-weight:700;color:var(--text-main)">${r.ticker}</td>
+                                <td><span class="dir-tag ${r.direction}">${r.direction}</span></td>
+                                <td style="color:var(--accent-blue);font-weight:500">${r.play_type}</td>
+                                <td style="font-size:0.82rem;color:var(--text-muted);max-width:400px">${r.reasoning}</td>
+                                <td style="font-size:0.78rem;color:#f59e0b;max-width:250px">${r.risk_notes}</td>
+                            </tr>`;
+                }).join('')}</tbody>
+                    </table>`;
+            } catch (e) {
+                container.innerHTML = '<div class="loading">Recommendations unavailable. Start the API server and fetcher first.</div>';
+            }
+        }
+
+        function sortPlays(field) {
+            if (playsSortField === field) playsSortDir *= -1;
+            else { playsSortField = field; playsSortDir = -1; }
+            loadPlays();
+        }
+
+        // === AUTO-REFRESH (all views) ===
+        const AUTO_REFRESH_INTERVAL = 30000; // 30 seconds
+        let lastKnownUpdate = null;
+
+        async function autoRefreshAll() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/health`);
+                if (!resp.ok) return;
+                const health = await resp.json();
+
+                // Only refresh if data actually changed
+                if (health.last_updated && health.last_updated !== lastKnownUpdate) {
+                    lastKnownUpdate = health.last_updated;
+                    dataTimestamp = health.last_updated;
+                    console.log('[Auto-Refresh] New data detected:', health.last_updated);
+
+                    // Reload data from API
+                    try {
+                        const optResp = await fetch(`${API_BASE}/api/tickers`);
+                        if (optResp.ok) {
+                            const tickerData = await optResp.json();
+                            const tickers = tickerData.tickers || [];
+
+                            // Refresh analytics for all known tickers
+                            for (const ticker of tickers) {
+                                try {
+                                    const aResp = await fetch(`${API_BASE}/api/analytics/${ticker}`);
+                                    if (aResp.ok) {
+                                        const aData = await aResp.json();
+                                        if (aData.data) {
+                                            analyticsData[ticker] = {
+                                                price: aData.data.price,
+                                                timestamp: aData.data.timestamp,
+                                                strikes: {}
+                                            };
+                                            for (let sk in (aData.data.strikes || {})) {
+                                                analyticsData[ticker].strikes[parseFloat(sk)] = aData.data.strikes[sk];
+                                            }
+                                        }
+                                    }
+                                } catch (e) { /* skip ticker */ }
+                            }
+
+                            // Refresh heatmap data for all tickers
+                            const newHeatmap = [];
+                            for (const ticker of tickers) {
+                                try {
+                                    const oResp = await fetch(`${API_BASE}/api/options/${ticker}`);
+                                    if (oResp.ok) {
+                                        const oData = await oResp.json();
+                                        if (oData.contracts) newHeatmap.push(...oData.contracts);
+                                    }
+                                } catch (e) { /* skip ticker */ }
+                            }
+                            if (newHeatmap.length > 0) heatmapData = newHeatmap;
+                        }
+                    } catch (e) { console.log('[Auto-Refresh] Data reload failed'); }
+
+                    // Rebuild ticker suggestions (picks up new tickers like SPX)
+                    rebuildTickerSuggestions();
+
+                    // Refresh the currently active view
+                    refreshCurrentView();
+                    checkStaleness();
+                }
+            } catch (e) {
+                // API not available, skip
+            }
+        }
+
+        function refreshCurrentView() {
+            if (currentView === 'heatmap' && currentTicker) loadHeatmapData(currentTicker);
+            else if (currentView === 'analytics' && currentTicker) loadAnalyticsData(currentTicker);
+            else if (currentView === 'gex-profile' && currentTicker) loadGexProfile(currentTicker);
+            else if (currentView === 'plays') loadPlays();
+            else if (currentView === 'alerts') loadAlerts();
+        }
+
+        // Start auto-refresh polling
+        setInterval(autoRefreshAll, AUTO_REFRESH_INTERVAL);
     </script>
-    <script src="auto_refresh.js"></script>
 </body>
 
 </html>

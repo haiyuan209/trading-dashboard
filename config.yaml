@@ -1,0 +1,36 @@
+market_hours:
+  open: "09:30"
+  close: "16:00"
+  timezone: "America/New_York"
+
+fetcher:
+  refresh_interval: 60        # seconds between fetch cycles
+  max_tickers_per_cycle: 100
+  api_retry_attempts: 3
+  api_retry_delay: 2           # base delay in seconds (exponential backoff)
+
+database:
+  path: "data/options_history.db"
+  retention_days: 30
+
+alerts:
+  enabled: true
+  desktop_notifications: true
+  discord_webhook: ""          # paste your Discord webhook URL here
+  telegram_bot_token: ""       # paste your Telegram bot token here
+  telegram_chat_id: ""         # paste your Telegram chat ID here
+  thresholds:
+    gex_flip: true             # alert when net GEX flips sign
+    new_max_gamma_strike: true # alert when max gamma strike shifts
+    price_near_gamma_wall_pct: 1.0  # alert when price within X% of gamma wall
+
+api_server:
+  host: "127.0.0.1"
+  port: 8000
+
+logging:
+  level: "INFO"
+  file: "logs/trading.log"
+  max_bytes: 10485760          # 10 MB
+  backup_count: 5
+  staleness_minutes: 5         # warn if data older than this

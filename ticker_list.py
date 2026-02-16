@@ -8,12 +8,13 @@ Curated from: Top Market Cap, Highest Options Volume, Most Active Trading
 # ============================================================================
 # This list prioritizes tickers with the highest options trading volume and
 # open interest, ensuring maximum liquidity for options analysis.
-# Excludes $SPX (not supported by Schwab API - index options unavailable)
+# Index options use $ prefix (e.g. $SPX, $NDX, $RUT)
 # ============================================================================
 
 TOP_100_LIQUID_OPTIONS = [
     # Tier 1: Ultra-High Liquidity (500K+ contracts/day)
-    'SPY',    # S&P 500 ETF - #1 Most liquid
+    '$SPX',   # S&P 500 Index Options (use $SPX for Schwab API)
+    'SPY',    # S&P 500 ETF - #1 Most liquid ETF options
     'QQQ',    # Nasdaq 100 ETF - #2 Most liquid
     'AAPL',   # Apple
     'TSLA',   # Tesla
