@@ -259,7 +259,9 @@ def _refresh_api_store():
 
 
 def fetch_all_tickers():
-    """Fetch data for all tickers"""
+    """Fetch data for all tickers using parallel workers"""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
     log.info("=" * 70)
     log.info("Data Fetch Cycle Started: %s", datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     log.info("=" * 70)
@@ -275,25 +277,36 @@ def fetch_all_tickers():
     # Limit tickers to avoid overwhelming API
     tickers_to_fetch = TOP_100_LIQUID_OPTIONS[:MAX_TICKERS_PER_CYCLE]
     total_tickers = len(tickers_to_fetch)
+    PARALLEL_WORKERS = 10
 
-    for i, ticker in enumerate(tickers_to_fetch, 1):
-        log.info("[%d/%d] Fetching %s...", i, total_tickers, ticker)
+    log.info("Fetching %d tickers with %d parallel workers...", total_tickers, PARALLEL_WORKERS)
+    start_time = time.time()
 
+    def _fetch_one(ticker):
         try:
             ticker_data = fetch_option_data(client, ticker)
-            if ticker_data:
-                all_data.extend(ticker_data)
-                log.info("  Got %d contracts", len(ticker_data))
-            else:
-                log.warning("  No data returned for %s", ticker)
-                errors.append(ticker)
-
-            # Small delay to avoid rate limiting
-            time.sleep(0.5)
-
+            return ticker, ticker_data or []
         except Exception as e:
             log.error("  Error fetching %s: %s", ticker, e)
-            errors.append(ticker)
+            return ticker, []
+
+    with ThreadPoolExecutor(max_workers=PARALLEL_WORKERS) as executor:
+        futures = {executor.submit(_fetch_one, t): t for t in tickers_to_fetch}
+
+        for future in as_completed(futures):
+            ticker = futures[future]
+            try:
+                _, ticker_data = future.result()
+                if ticker_data:
+                    all_data.extend(ticker_data)
+                else:
+                    errors.append(ticker)
+            except Exception as e:
+                log.error("Future error for %s: %s", ticker, e)
+                errors.append(ticker)
+
+    elapsed = time.time() - start_time
+    log.info("Fetched %d contracts in %.1fs (%d errors)", len(all_data), elapsed, len(errors))
 
     # Save data files (existing behavior)
     log.info("=" * 70)

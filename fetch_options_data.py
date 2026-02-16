@@ -2,6 +2,7 @@
 Options Data Fetcher with Retry Logic
 =======================================
 Fetches option chains from Schwab API with exponential backoff retry.
+Supports parallel fetching for faster data refresh.
 """
 
 import schwab
@@ -10,6 +11,7 @@ import os
 import csv
 import time
 import socket
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dotenv import load_dotenv
 from logger import get_logger
 
@@ -223,6 +225,19 @@ def save_analytics_data(all_data):
     log.info("Saved %d tickers to all_tickers_data.js", len(ticker_data))
 
 
+def _fetch_one(client, ticker):
+    """Fetch a single ticker — used as a ThreadPoolExecutor target."""
+    try:
+        contracts = fetch_option_data(client, ticker)
+        return ticker, contracts or []
+    except Exception as e:
+        log.error("Unexpected error fetching %s: %s", ticker, e)
+        return ticker, []
+
+
+PARALLEL_WORKERS = 10  # concurrent API calls
+
+
 def main():
     client = get_client()
     if not client:
@@ -235,41 +250,59 @@ def main():
         'Delta', 'Gamma', 'Theta', 'Vega', 'Rho', 'ImpliedVol'
     ]
 
-    log.info("Starting fetch for %d tickers...", len(TARGET_TICKERS))
+    log.info("Starting parallel fetch for %d tickers (%d workers)...", len(TARGET_TICKERS), PARALLEL_WORKERS)
+    start_time = time.time()
 
+    all_contracts = []
+    errors = []
+
+    with ThreadPoolExecutor(max_workers=PARALLEL_WORKERS) as executor:
+        futures = {}
+        for i, ticker in enumerate(TARGET_TICKERS):
+            # Small stagger to avoid burst rate limiting
+            future = executor.submit(_fetch_one, client, ticker)
+            futures[future] = ticker
+
+        for future in as_completed(futures):
+            ticker = futures[future]
+            try:
+                _, contracts = future.result()
+                if contracts:
+                    all_contracts.extend(contracts)
+                else:
+                    errors.append(ticker)
+            except Exception as e:
+                log.error("Future error for %s: %s", ticker, e)
+                errors.append(ticker)
+
+    elapsed = time.time() - start_time
+    log.info("Fetched %d contracts from %d tickers in %.1fs (%d errors)",
+             len(all_contracts), len(TARGET_TICKERS) - len(errors), elapsed, len(errors))
+
+    # Save CSV
     with open(output_file, 'w', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
+        writer.writerows(all_contracts)
 
-        for ticker in TARGET_TICKERS:
-            contracts = fetch_option_data(client, ticker)
-            if contracts:
-                writer.writerows(contracts)
-
-            # Rate limit politeness
-            time.sleep(0.5)
-
-    # Also save as a JS file for the Dashboard
+    # Save JS file for dashboard
     log.info("Generating dashboard data file...")
-    all_rows = []
-    with open(output_file, 'r', encoding='utf-8') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            for k, v in row.items():
-                if k not in ['Symbol', 'Underlying', 'OptionSymbol', 'Expiration', 'Type', 'TradeSide']:
-                    try:
-                        row[k] = float(v) if v else 0
-                    except:
-                        pass
-            all_rows.append(row)
+    for row in all_contracts:
+        for k, v in row.items():
+            if k not in ['Symbol', 'Underlying', 'OptionSymbol', 'Expiration', 'Type', 'TradeSide']:
+                try:
+                    row[k] = float(v) if v else 0
+                except:
+                    pass
 
     with open('option_data.js', 'w', encoding='utf-8') as f:
-        f.write(f"const OPTION_DATA = {json.dumps(all_rows)};")
+        f.write(f"const OPTION_DATA = {json.dumps(all_contracts)};")
 
     # Also generate analytics data for analytics view
-    save_analytics_data(all_rows)
+    save_analytics_data(all_contracts)
 
     log.info("Done! Data saved to %s and option_data.js", output_file)
 
 if __name__ == "__main__":
     main()
+
